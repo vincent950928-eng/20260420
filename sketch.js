@@ -35,18 +35,27 @@ function draw() {
     let stepSize = 20; // 設定單位大小
     pg.textAlign(CENTER, CENTER);
     pg.textSize(8);
-    pg.fill(255); // 設定文字顏色為白色
 
-    // 以 20x20 為單位遍歷像素
+    // 以 20x20 為單位遍歷視訊影像像素
     for (let py = 0; py < capture.height; py += stepSize) {
       for (let px = 0; px < capture.width; px += stepSize) {
-        let index = (px + py * capture.width) * 4;
-        let r = capture.pixels[index];
-        let g = capture.pixels[index + 1];
-        let b = capture.pixels[index + 2];
-        let avg = floor((r + g + b) / 3); // 計算平均值
+        // 取得該 20x20 區域中心點的像素座標，並確保不超過影像邊界
+        const sampleX = floor(min(px + stepSize / 2, capture.width - 1));
+        const sampleY = floor(min(py + stepSize / 2, capture.height - 1));
+        
+        // 計算在 pixels 一維陣列中的索引位置 (每個像素佔 4 碼：R, G, B, A)
+        const index = (sampleX + sampleY * capture.width) * 4;
+        
+        const r = capture.pixels[index];     // pixel[0]
+        const g = capture.pixels[index + 1]; // pixel[1]
+        const b = capture.pixels[index + 2]; // pixel[2]
+        
+        const avg = floor((r + g + b) / 3);  // 計算平均亮度值
 
-        // 在 pg 層的對應位置顯示數值
+        // 根據亮度自動切換文字顏色，增加可讀性
+        pg.fill(avg > 128 ? 0 : 255);
+        
+        // 在繪圖層的對應位置中心顯示平均值
         pg.text(avg, px + stepSize / 2, py + stepSize / 2);
       }
     }
