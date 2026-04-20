@@ -29,16 +29,27 @@ function draw() {
 
   // 2. 如果繪圖層已建立，在上面繪製內容並疊加到視訊上方
   if (pg) {
-    pg.clear(); // 清除上一幀內容，保持背景透明
+    pg.clear(); 
+    capture.loadPixels(); // 載入視訊像素資料
     
-    // --- 在 pg 繪圖層上繪製內容 (範例：在中心畫一個圓與文字) ---
-    pg.fill(255, 255, 0); // 黃色
-    pg.noStroke();
-    pg.ellipse(pg.width / 2, pg.height / 2, 50, 50); 
-    
-    pg.textAlign(CENTER);
-    pg.textSize(20);
-    pg.text("Overlay Layer", pg.width / 2, pg.height / 2 + 40);
+    let stepSize = 20; // 設定單位大小
+    pg.textAlign(CENTER, CENTER);
+    pg.textSize(8);
+    pg.fill(255); // 設定文字顏色為白色
+
+    // 以 20x20 為單位遍歷像素
+    for (let py = 0; py < capture.height; py += stepSize) {
+      for (let px = 0; px < capture.width; px += stepSize) {
+        let index = (px + py * capture.width) * 4;
+        let r = capture.pixels[index];
+        let g = capture.pixels[index + 1];
+        let b = capture.pixels[index + 2];
+        let avg = floor((r + g + b) / 3); // 計算平均值
+
+        // 在 pg 層的對應位置顯示數值
+        pg.text(avg, px + stepSize / 2, py + stepSize / 2);
+      }
+    }
 
     // 將繪圖層畫在與視訊相同的位置與大小
     image(pg, x, y, w, h);
